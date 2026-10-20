@@ -54,15 +54,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   noticeNotMaps.style.display = 'none';
   sectionControls.style.display = 'flex';
 
+  // Helper to ensure content script is injected on active tab
+  async function ensureContentScript() {
+    if (!activeTab || !activeTab.id) return false;
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: activeTab.id },
+        files: ['lib/parser.js', 'lib/exporter.js', 'content/content.js']
+      });
+      return true;
+    } catch (e) {
+      console.warn('[Popup] Injection check:', e);
+      return false;
+    }
+  }
+
   // 2. Poll status from Content Script
   async function syncStatus() {
     if (!activeTab || !activeTab.id) return;
 
     try {
-      chrome.tabs.sendMessage(activeTab.id, { type: 'GET_STATUS' }, (res) => {
+      chrome.tabs.sendMessage(activeTab.id, { type: 'GET_STATUS' }, async (res) => {
         if (chrome.runtime.lastError || !res) {
-          // Content script might not be injected yet
-          labelActiveQuery.innerText = 'Buka pencarian di Maps...';
+          // Attempt auto-inject if content script not responding
+          await ensureContentScript();
+          labelActiveQuery.innerText = 'Buka & cari lokasi di Maps...';
           return;
         }
 
@@ -82,35 +98,46 @@ document.addEventListener('DOMContentLoaded', async () => {
           progressFill.style.width = `${pct}%`;
         }
 
-        // Toggle action buttons
+        // Toggle action buttons & status message
         if (status === 'SCANNING' || status === 'SCRAPING') {
           btnStart.style.display = 'none';
           btnPause.style.display = 'inline-flex';
           btnResume.style.display = 'none';
           btnStop.style.display = 'inline-flex';
-          statusText.innerText = `Sedang mengambil data (${count}/${target})...`;
+          statusText.style.color = '';
+          statusText.innerText = res.statusMessage || `Sedang mengambil data (${count}/${target})...`;
         } else if (status === 'PAUSED') {
           btnStart.style.display = 'none';
           btnPause.style.display = 'none';
           btnResume.style.display = 'inline-flex';
           btnStop.style.display = 'inline-flex';
-          statusText.innerText = 'Proses dijeda sementara.';
+          statusText.style.color = '';
+          statusText.innerText = res.statusMessage || 'Proses dijeda sementara.';
         } else if (status === 'FINISHED') {
           btnStart.style.display = 'inline-flex';
           btnPause.style.display = 'none';
           btnResume.style.display = 'none';
           btnStop.style.display = 'none';
-          statusText.innerText = `Selesai! ${count} kontak berhasil ditarik.`;
+          statusText.style.color = '#10b981';
+          statusText.innerText = res.statusMessage || `Selesai! ${count} kontak berhasil ditarik.`;
+        } else if (status === 'ERROR') {
+          btnStart.style.display = 'inline-flex';
+          btnPause.style.display = 'none';
+          btnResume.style.display = 'none';
+          btnStop.style.display = 'none';
+          statusText.style.color = '#ef4444';
+          statusText.innerText = res.errorMessage || res.statusMessage || 'Terjadi kesalahan.';
         } else {
           // IDLE / STOPPED
           btnStart.style.display = 'inline-flex';
           btnPause.style.display = 'none';
           btnResume.style.display = 'none';
           btnStop.style.display = 'none';
+          statusText.style.color = '';
           if (status === 'STOPPED') {
-            statusText.innerText = `Dihentikan. ${count} kontak tersimpan.`;
+            statusText.innerText = res.statusMessage || `Dihentikan. ${count} kontak tersimpan.`;
           } else {
-            statusText.innerText = 'Siap memulai ekstraksi...';
+            statusText.innerText = res.statusMessage || 'Siap memulai ekstraksi...';
           }
         }
 
@@ -124,18 +151,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Initial sync & interval
+  await ensureContentScript();
   syncStatus();
   pollTimer = setInterval(syncStatus, 1000);
 
   // 3. Attach Actions
-  btnStart.addEventListener('click', () => {
+  btnStart.addEventListener('click', async () => {
     const limit = parseInt(inputLimit.value, 10) || 20;
     const delayMs = parseInt(selectSpeed.value, 10) || 1200;
+
+    badgeStatus.className = 'badge-status scanning';
+    badgeStatus.innerText = 'STARTING';
+    statusText.style.color = '';
+    statusText.innerText = 'Menghubungkan ke tab Google Maps...';
+
+    await ensureContentScript();
+
     chrome.tabs.sendMessage(activeTab.id, {
       type: 'START_SCRAPE',
       limit,
       delayMs
-    }, () => syncStatus());
+    }, (res) => {
+      if (chrome.runtime.lastError) {
+        badgeStatus.className = 'badge-status error';
+        badgeStatus.innerText = 'ERROR';
+        statusText.style.color = '#ef4444';
+        statusText.innerText = 'Gagal menghubungi tab Maps. Refresh tab Google Maps sekali, lalu coba lagi.';
+        return;
+      }
+      syncStatus();
+    });
   });
 
   btnPause.addEventListener('click', () => {

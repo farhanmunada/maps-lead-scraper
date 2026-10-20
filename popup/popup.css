@@ -81,8 +81,9 @@ body {
 .badge-status.scanning { background: #3b82f620; color: #60a5fa; border: 1px solid #3b82f640; }
 .badge-status.scraping { background: #10b98120; color: #34d399; border: 1px solid #10b98140; }
 .badge-status.paused { background: #f59e0b20; color: #fbbf24; border: 1px solid #f59e0b40; }
-.badge-status.done { background: #8b5cf620; color: #a78bfa; border: 1px solid #8b5cf640; }
-.badge-status.stopped { background: #ef444420; color: #f87171; border: 1px solid #ef444440; }
+.badge-status.done, .badge-status.finished { background: #10b98120; color: #34d399; border: 1px solid #10b98140; }
+.badge-status.stopped { background: #f59e0b20; color: #fbbf24; border: 1px solid #f59e0b40; }
+.badge-status.error { background: #ef444420; color: #f87171; border: 1px solid #ef444440; }
 
 /* Notice Card */
 .notice-card {

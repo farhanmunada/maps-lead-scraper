@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Maps Lead Scraper - Business Extractor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Ekstrak kontak bisnis, nomor telepon, direct WhatsApp link, website, dan alamat dari Google Maps ke format CSV/Excel.",
   "icons": {
     "16": "icons/icon16.png",
@@ -23,21 +23,18 @@
   ],
   "host_permissions": [
     "*://*.google.com/maps/*",
-    "*://www.google.co.id/maps/*"
+    "*://*.google.co.id/maps/*"
   ],
   "content_scripts": [
     {
       "matches": [
         "*://*.google.com/maps/*",
-        "*://www.google.co.id/maps/*"
+        "*://*.google.co.id/maps/*"
       ],
       "js": [
         "lib/parser.js",
         "lib/exporter.js",
         "content/content.js"
-      ],
-      "css": [
-        "content/content.css"
       ],
       "run_at": "document_idle"
     }
