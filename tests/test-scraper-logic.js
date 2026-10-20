@@ -90,4 +90,17 @@ console.log('🧪 Menjalankan pengujian logika Maps Lead Scraper...\n');
   console.log('   ✓ JSON output valid dan parsing sukses');
 }
 
+// 5. Test Title Validation & False Positive Rejection
+{
+  console.log('\n5. Menguji validasi nama bisnis (anti "Hasil" / header generik):');
+  assert.strictEqual(MapsParser.isValidBusinessTitle('Hasil'), false);
+  assert.strictEqual(MapsParser.isValidBusinessTitle('Results'), false);
+  assert.strictEqual(MapsParser.isValidBusinessTitle('Search Results'), false);
+  assert.strictEqual(MapsParser.isValidBusinessTitle('Google Maps'), false);
+  assert.strictEqual(MapsParser.isValidBusinessTitle(''), false);
+  assert.strictEqual(MapsParser.isValidBusinessTitle('Kopi Nako Temanggung'), true);
+  assert.strictEqual(MapsParser.isValidBusinessTitle('Bengkel Motor Maju'), true);
+  console.log('   ✓ Header generik Maps ("Hasil", "Results") ditolak secara ketat');
+}
+
 console.log('\n🎉 SEMUA PENGUJIAN LOGIKA LOLOS 100% TANPA ERROR!\n');
