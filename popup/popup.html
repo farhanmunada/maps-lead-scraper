@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maps Lead Scraper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-area">
+        <svg class="logo-icon" viewBox="0 0 24 24">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+        </svg>
+        <div class="logo-text">
+          <h1>Maps Lead Scraper</h1>
+          <span class="version">v1.0.0</span>
+        </div>
+      </div>
+      <span id="badge-status" class="badge-status idle">IDLE</span>
+    </header>
+
+    <!-- Tab Detection Notice -->
+    <div id="notice-not-maps" class="notice-card" style="display: none;">
+      <div class="notice-icon">⚠️</div>
+      <div class="notice-content">
+        <h3>Bukan Tab Google Maps</h3>
+        <p>Buka Google Maps dan cari tempat/usaha terlebih dahulu untuk mulai scraping.</p>
+        <button id="btn-open-maps" class="btn btn-secondary btn-sm">Buka Google Maps</button>
+      </div>
+    </div>
+
+    <!-- Active Maps Controls -->
+    <main id="section-controls" class="controls-area">
+      <!-- Active Query Indicator -->
+      <div class="query-card">
+        <span class="query-label">Pencarian Aktif:</span>
+        <span id="label-active-query" class="query-val">Mendeteksi...</span>
+      </div>
+
+      <!-- Settings Inputs -->
+      <div class="form-group">
+        <div class="form-row">
+          <label for="popup-input-limit" class="input-label">Target Jumlah Kontak:</label>
+          <input type="number" id="popup-input-limit" class="input-number" value="20" min="1" max="500">
+        </div>
+        <div class="form-row">
+          <label for="popup-select-speed" class="input-label">Kecepatan Jeda:</label>
+          <select id="popup-select-speed" class="select-dropdown">
+            <option value="600">Cepat (0.6s)</option>
+            <option value="1200" selected>Normal (1.2s)</option>
+            <option value="2000">Aman (2.0s)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Progress Stats -->
+      <div class="stats-card">
+        <div class="stats-header">
+          <span class="stats-title">Total Terkumpul</span>
+          <span id="popup-stats-counter" class="stats-count">0 / 20</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="popup-progress-fill" class="progress-bar-fill"></div>
+        </div>
+        <div id="popup-status-text" class="status-detail">Siap memulai pencarian data...</div>
+      </div>
+
+      <!-- Primary Action Buttons -->
+      <div class="action-buttons">
+        <button id="popup-btn-start" class="btn btn-primary">
+          <span class="btn-icon">▶</span> Mulai Scrape
+        </button>
+        <button id="popup-btn-pause" class="btn btn-secondary" style="display: none;">
+          <span class="btn-icon">⏸</span> Jeda
+        </button>
+        <button id="popup-btn-resume" class="btn btn-primary" style="display: none;">
+          <span class="btn-icon">▶</span> Lanjut
+        </button>
+        <button id="popup-btn-stop" class="btn btn-danger" style="display: none;">
+          <span class="btn-icon">⏹</span> Stop
+        </button>
+      </div>
+
+      <!-- Export Group -->
+      <div class="export-area">
+        <span class="export-label">Unduh Hasil:</span>
+        <div class="export-buttons">
+          <button id="popup-btn-csv" class="btn btn-outline" disabled>
+            <span>📊</span> Download CSV / Excel
+          </button>
+          <button id="popup-btn-json" class="btn btn-outline" disabled>
+            <span>{ }</span> JSON
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>100% Client-side. Aman & otomatis WhatsApp link.</span>
+    </footer>
+  </div>
+
+  <script src="../lib/exporter.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
