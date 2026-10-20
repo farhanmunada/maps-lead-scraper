@@ -89,8 +89,13 @@
   async function scrollAndCollectItems(target) {
     updateStatus('SCANNING', 'Mencari daftar hasil bisnis di Google Maps...');
 
-    // First check: Are there any place items on screen?
-    let anchors = Array.from(document.querySelectorAll('a.hfpxzc, div.Nv2PK a[href*="/maps/place/"]'));
+    // Wait up to 8 seconds for search results or place details to appear
+    let anchors = [];
+    for (let wait = 0; wait < 16; wait++) {
+      anchors = Array.from(document.querySelectorAll('a.hfpxzc, div.Nv2PK a[href*="/maps/place/"]'));
+      if (anchors.length > 0 || window.location.href.includes('/maps/place/')) break;
+      await sleep(500);
+    }
 
     // Check single place page if no results list
     if (anchors.length === 0) {
@@ -101,7 +106,7 @@
           href: window.location.href
         }];
       }
-      throw new Error('Daftar pencarian belum terbuka. Ketik pencarian (misal: "cafe tebet") di Maps lalu tekan Enter.');
+      throw new Error('Daftar pencarian belum terbuka. Ketik kata kunci bisnis di kolom pencarian lalu coba lagi.');
     }
 
     const feed = findFeedElement();

@@ -121,14 +121,43 @@ body {
   gap: 12px;
 }
 
-.query-card {
+.search-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
   background: var(--bg-card);
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.input-text {
+  flex: 1;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+}
+
+.input-text:focus {
+  border-color: var(--accent);
+}
+
+.query-active-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed var(--border);
+  padding-top: 6px;
+  margin-top: 2px;
 }
 
 .query-label {
@@ -137,10 +166,10 @@ body {
 }
 
 .query-val {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--accent);
-  max-width: 200px;
+  max-width: 190px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

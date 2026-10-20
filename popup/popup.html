@@ -34,10 +34,17 @@
 
     <!-- Active Maps Controls -->
     <main id="section-controls" class="controls-area">
-      <!-- Active Query Indicator -->
-      <div class="query-card">
-        <span class="query-label">Pencarian Aktif:</span>
-        <span id="label-active-query" class="query-val">Mendeteksi...</span>
+      <!-- Search Input & Status Indicator -->
+      <div class="search-section">
+        <label for="popup-input-query" class="input-label">Kata Kunci Bisnis / Lokasi:</label>
+        <div class="search-input-group">
+          <input type="text" id="popup-input-query" class="input-text" placeholder="Misal: cafe temanggung, pet shop..." />
+          <button id="popup-btn-search" class="btn btn-secondary btn-sm" type="button" title="Buka pencarian ini di Google Maps">Cari</button>
+        </div>
+        <div class="query-active-status">
+          <span class="query-label">Pencarian aktif di tab:</span>
+          <span id="label-active-query" class="query-val">Mendeteksi...</span>
+        </div>
       </div>
 
       <!-- Settings Inputs -->

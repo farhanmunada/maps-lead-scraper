@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sectionControls = document.getElementById('section-controls');
   const btnOpenMaps = document.getElementById('btn-open-maps');
   const labelActiveQuery = document.getElementById('label-active-query');
+  const inputQuery = document.getElementById('popup-input-query');
+  const btnSearch = document.getElementById('popup-btn-search');
 
   const inputLimit = document.getElementById('popup-input-limit');
   const selectSpeed = document.getElementById('popup-select-speed');
@@ -69,6 +71,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Helper to navigate tab to a search query on Google Maps
+  function navigateAndSearch(query) {
+    return new Promise((resolve) => {
+      const searchUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+      chrome.tabs.update(activeTab.id, { url: searchUrl }, () => {
+        const listener = (tabId, info) => {
+          if (tabId === activeTab.id && info.status === 'complete') {
+            chrome.tabs.onUpdated.removeListener(listener);
+            // Give Maps 2 seconds to hydrate search DOM
+            setTimeout(resolve, 2000);
+          }
+        };
+        chrome.tabs.onUpdated.addListener(listener);
+      });
+    });
+  }
+
   // 2. Poll status from Content Script
   async function syncStatus() {
     if (!activeTab || !activeTab.id) return;
@@ -87,7 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         badgeStatus.className = `badge-status ${status.toLowerCase()}`;
         badgeStatus.innerText = status;
 
-        labelActiveQuery.innerText = res.activeQuery || 'Google Maps';
+        const q = res.activeQuery || 'Google Maps';
+        labelActiveQuery.innerText = q;
+        if (inputQuery && !inputQuery.value && document.activeElement !== inputQuery && q !== 'maps_leads' && q !== 'Google Maps') {
+          inputQuery.value = q;
+        }
 
         const count = res.leadsCount || 0;
         const target = res.targetCount || parseInt(inputLimit.value, 10) || 20;
@@ -156,9 +179,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   pollTimer = setInterval(syncStatus, 1000);
 
   // 3. Attach Actions
+  if (btnSearch) {
+    btnSearch.addEventListener('click', async () => {
+      const q = inputQuery ? inputQuery.value.trim() : '';
+      if (!q) {
+        statusText.style.color = '#ef4444';
+        statusText.innerText = 'Ketik kata kunci pencarian terlebih dahulu.';
+        return;
+      }
+      statusText.style.color = '';
+      statusText.innerText = `Membuka pencarian "${q}" di Google Maps...`;
+      await navigateAndSearch(q);
+      await ensureContentScript();
+      syncStatus();
+    });
+  }
+
   btnStart.addEventListener('click', async () => {
     const limit = parseInt(inputLimit.value, 10) || 20;
     const delayMs = parseInt(selectSpeed.value, 10) || 1200;
+    const q = inputQuery ? inputQuery.value.trim() : '';
+
+    // Verify if tab is on search results
+    let currentTabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    let curTab = currentTabs && currentTabs[0] ? currentTabs[0] : activeTab;
+    const isSearchPage = curTab && curTab.url && (curTab.url.includes('/maps/search/') || curTab.url.includes('/maps/place/'));
+
+    if (!isSearchPage) {
+      if (q) {
+        badgeStatus.className = 'badge-status scanning';
+        badgeStatus.innerText = 'SEARCHING';
+        statusText.style.color = '';
+        statusText.innerText = `Membuka pencarian "${q}" di Google Maps...`;
+        await navigateAndSearch(q);
+      } else {
+        badgeStatus.className = 'badge-status idle';
+        badgeStatus.innerText = 'IDLE';
+        statusText.style.color = '#f59e0b';
+        statusText.innerText = 'Belum ada pencarian. Ketik kata kunci bisnis di atas (misal: cafe tebet) lalu klik Mulai.';
+        return;
+      }
+    }
 
     badgeStatus.className = 'badge-status scanning';
     badgeStatus.innerText = 'STARTING';
