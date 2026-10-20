@@ -1,0 +1,21 @@
+# Dependencies and environments
+node_modules/
+.env
+.env.*
+
+# Build artifacts
+dist/
+build/
+*.zip
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Exports / data dumps
+exports/
+*.csv
+*.json
+!manifest.json
